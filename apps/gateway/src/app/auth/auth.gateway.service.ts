@@ -1,0 +1,27 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { AuthLoginBodies, AuthRegisterBodies } from '@payload/auth';
+import { lastValueFrom } from 'rxjs';
+
+@Injectable()
+export class AuthGatewayService {
+  constructor(@Inject('AUTH_SERVICE') private readonly client: ClientProxy) {}
+
+  async userRegister(body: AuthRegisterBodies) {
+    return lastValueFrom(
+      this.client.send<{ success: boolean; data: any }>(
+        { cmd: 'register' },
+        body
+      )
+    );
+  }
+
+  async userLogin(body: AuthLoginBodies) {
+    return lastValueFrom(
+      this.client.send<{
+        success: boolean;
+        data: { accessToken: string; refreshToken: string };
+      }>({ cmd: 'login' }, body)
+    );
+  }
+}
