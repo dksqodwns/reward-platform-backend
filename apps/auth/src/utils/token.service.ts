@@ -39,4 +39,18 @@ export class TokenService {
 
     return { refreshToken, expiresAt };
   }
+
+  async verifyAccessToken(
+    accessToken: string
+  ): Promise<{ userId: string; email: string; roles: string[] }> {
+    return this.jwtService.verifyAsync(accessToken, {
+      secret: this.ACCESS_TOKEN_SECRET,
+    });
+  }
+
+  async verifyRefreshToken(refreshToken: string): Promise<{ userId: string }> {
+    return this.jwtService.verifyAsync(refreshToken, {
+      secret: this.REFRESH_TOKEN_SECRET,
+    });
+  }
 }

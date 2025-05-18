@@ -24,4 +24,13 @@ export class AuthGatewayService {
       }>({ cmd: 'login' }, body)
     );
   }
+
+  async userRefreshAccessToken(oldToken: string) {
+    return lastValueFrom(
+      this.client.send<{
+        success: boolean;
+        data: { accessToken: string; refreshToken: string };
+      }>({ cmd: 'refresh' }, oldToken)
+    );
+  }
 }

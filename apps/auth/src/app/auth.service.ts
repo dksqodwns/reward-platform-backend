@@ -66,7 +66,7 @@ export class AuthService {
         '이메일 또는 비밀번호가 올바르지 않습니다.'
       );
     }
-    const accesTokenData = await this.tokenService.createAccessToken(user);
+    const accessTokenData = await this.tokenService.createAccessToken(user);
     const refreshTokenData = await this.tokenService.createRefreshToken(user);
 
     await this.refreshTokenModel.create({
@@ -78,8 +78,54 @@ export class AuthService {
     return {
       success: true,
       data: {
-        accessToken: accesTokenData.accessToken,
+        accessToken: accessTokenData.accessToken,
         refreshToken: refreshTokenData.refreshToken,
+      },
+    };
+  }
+
+  async userRefreshAccessToken(oldToken: string | undefined) {
+    if (!oldToken) {
+      throw new UnauthorizedException('리프레시 토큰이 없습니다.');
+    }
+    let payload: { userId: string };
+    try {
+      payload = await this.tokenService.verifyRefreshToken(oldToken);
+    } catch (e) {
+      throw new UnauthorizedException('유효하지 않은 리프레시 토큰 입니다.');
+    }
+
+    const record = await this.refreshTokenModel.findOne({
+      refreshToken: oldToken,
+    });
+    if (!record || record.expiresAt < new Date()) {
+      throw new UnauthorizedException(
+        '리프레시 토큰이 만료되었거나, 존재하지 않습니다.'
+      );
+    }
+
+    const user = await this.userModel.findOne({ userId: payload.userId });
+    if (!user) {
+      throw new UnauthorizedException('존재하지 않는 사용자 입니다.');
+    }
+
+    const { accessToken, ...data } = await this.tokenService.createAccessToken(
+      user
+    );
+    const { refreshToken, expiresAt } =
+      await this.tokenService.createRefreshToken(user);
+    await this.refreshTokenModel.deleteOne({ _id: record._id });
+    await this.refreshTokenModel.create({
+      userId: user._id.toString(),
+      refreshToken,
+      expiresAt,
+    });
+
+    return {
+      success: true,
+      data: {
+        accessToken,
+        refreshToken,
       },
     };
   }

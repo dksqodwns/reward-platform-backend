@@ -16,4 +16,9 @@ export class AuthController {
   userLogin(@Payload() body: AuthLoginBodies) {
     return this.authService.userLogin(body);
   }
+
+  @MessagePattern({ cmd: 'refresh' })
+  userRefreshAccessToken(@Payload() oldToken: string | undefined) {
+    return this.authService.userRefreshAccessToken(oldToken);
+  }
 }
