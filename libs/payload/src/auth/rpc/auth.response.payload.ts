@@ -10,4 +10,6 @@ export interface AuthUserResponsePayload {
   email: string;
   userName: string;
   roles: string[];
+  hasLoggedIn: boolean;
+  invitesSent: number;
 }

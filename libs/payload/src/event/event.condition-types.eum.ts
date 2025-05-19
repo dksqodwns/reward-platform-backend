@@ -1,4 +1,4 @@
 export enum ConditionType {
-  LOGIN_DAYS = 'LOGIN_DAYS',
+  FIRST_LOGIN = 'FIRST_LOGIN',
   FRIEND_INVITE = 'FRIEND_INVITE',
 }

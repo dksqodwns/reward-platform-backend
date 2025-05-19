@@ -8,11 +8,7 @@ import {
 import { Type, TypeHelpOptions } from 'class-transformer';
 import { ConditionType } from '../event.condition-types.eum';
 
-export class LoginDaysDto {
-  @IsNumber()
-  @Min(1)
-  days!: number;
-}
+export class FirstLoginDto {}
 
 export class FriendInvitesDto {
   @IsNumber()
@@ -28,15 +24,15 @@ export class EventConditionPayload {
   @Type((options?: TypeHelpOptions) => {
     const obj = options?.object as EventConditionPayload;
     switch (obj.type) {
-      case ConditionType.LOGIN_DAYS:
-        return LoginDaysDto;
+      case ConditionType.FIRST_LOGIN:
+        return FirstLoginDto;
       case ConditionType.FRIEND_INVITE:
         return FriendInvitesDto;
       default:
         return Object;
     }
   })
-  params!: LoginDaysDto | FriendInvitesDto;
+  params!: FirstLoginDto | FriendInvitesDto;
 }
 
 export class ConditionGroupPayload {
