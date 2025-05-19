@@ -13,7 +13,8 @@ import { AuthGatewayService } from './auth.gateway.service';
 import { AuthLoginBodies, AuthRegisterBodies } from '@payload/auth';
 import { Request, Response } from 'Express';
 import { AuthDefaultQueries } from '../../dto/queries/auth.default.queries';
-import { Public, Roles } from '@common/decorators';
+import { Permissions, Public } from '@common/decorators';
+import { Permission } from '@payload/auth/permissions.enum';
 
 @Controller('auth')
 export class AuthGatewayController {
@@ -114,7 +115,7 @@ export class AuthGatewayController {
    * @param id
    */
   @Patch('users/:id/role')
-  @Roles('ADMIN')
+  @Permissions(Permission.USER_UPDATE)
   async userRoleUpdate(@Req() req: Request, @Param('id') userId: string) {
     return;
   }

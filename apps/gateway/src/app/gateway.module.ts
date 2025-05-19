@@ -7,9 +7,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '../strategies/jwt.strategy';
-import { JwtAuthGuard } from '../guards/jwt.guard';
+import { JwtAuthGuard, PermissionsGuard } from '../guards';
 import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from '../guards/roles.guard';
 
 @Module({
   imports: [
@@ -42,7 +41,7 @@ import { RolesGuard } from '../guards/roles.guard';
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: PermissionsGuard,
     },
   ],
   exports: [PassportModule, JwtModule],
