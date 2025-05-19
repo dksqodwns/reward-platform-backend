@@ -3,7 +3,11 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthLoginBodies, AuthRegisterBodies } from '@payload/auth';
+import {
+  AuthLoginBodies,
+  AuthRefreshTokenPayload,
+  AuthRegisterBodies,
+} from '@payload/auth';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   RefreshToken,
@@ -14,6 +18,7 @@ import {
 import { Model } from 'mongoose';
 import { PasswordEncoder } from '../utils';
 import { TokenService } from '../utils/token.service';
+import { AuthUserResponsePayload } from '@payload/auth/auth.response.payload';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +29,20 @@ export class AuthService {
     private readonly passwordEncoder: PasswordEncoder,
     private readonly tokenService: TokenService
   ) {}
+
+  async getUserByUserId(
+    userId: string
+  ): Promise<AuthUserResponsePayload | null> {
+    const user = await this.userModel.findOne({ _id: userId });
+    if (!user) return null;
+
+    return {
+      userId: user._id.toString(),
+      email: user.email,
+      userName: user.userName,
+      roles: user.roles,
+    };
+  }
 
   async userRegister(body: AuthRegisterBodies) {
     const isExistUser = await this.userModel.exists({ email: body.email });
@@ -88,11 +107,13 @@ export class AuthService {
     if (!oldToken) {
       throw new UnauthorizedException('리프레시 토큰이 없습니다.');
     }
-    let payload: { userId: string };
+    let payload: AuthRefreshTokenPayload;
     try {
       payload = await this.tokenService.verifyRefreshToken(oldToken);
     } catch (e) {
-      throw new UnauthorizedException('유효하지 않은 리프레시 토큰 입니다.');
+      throw new UnauthorizedException(
+        `유효하지 않은 리프레시 토큰 입니다. error=${e}`
+      );
     }
 
     const record = await this.refreshTokenModel.findOne({

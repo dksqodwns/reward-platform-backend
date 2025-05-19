@@ -1,6 +1,12 @@
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { UserDocument } from '../schemas';
 import { Injectable } from '@nestjs/common';
+import {
+  AuthAccessTokenPayload,
+  AuthRefreshTokenPayload,
+  ReturnAccessTokenPayload,
+  ReturnRefreshTokenPayload,
+} from '@payload/auth';
 
 @Injectable()
 export class TokenService {
@@ -10,8 +16,10 @@ export class TokenService {
 
   constructor(private readonly jwtService: JwtService) {}
 
-  async createAccessToken(user: UserDocument) {
-    const payload = {
+  async createAccessToken(
+    user: UserDocument
+  ): Promise<ReturnAccessTokenPayload> {
+    const payload: AuthAccessTokenPayload = {
       userId: user._id.toString(),
       email: user.email,
       roles: user.roles,
@@ -26,8 +34,10 @@ export class TokenService {
     return { accessToken, expiresAt };
   }
 
-  async createRefreshToken(user: UserDocument) {
-    const payload = {
+  async createRefreshToken(
+    user: UserDocument
+  ): Promise<ReturnRefreshTokenPayload> {
+    const payload: AuthRefreshTokenPayload = {
       userId: user._id.toString(),
     };
     const options: JwtSignOptions = {
@@ -42,13 +52,15 @@ export class TokenService {
 
   async verifyAccessToken(
     accessToken: string
-  ): Promise<{ userId: string; email: string; roles: string[] }> {
+  ): Promise<AuthAccessTokenPayload> {
     return this.jwtService.verifyAsync(accessToken, {
       secret: this.ACCESS_TOKEN_SECRET,
     });
   }
 
-  async verifyRefreshToken(refreshToken: string): Promise<{ userId: string }> {
+  async verifyRefreshToken(
+    refreshToken: string
+  ): Promise<AuthRefreshTokenPayload> {
     return this.jwtService.verifyAsync(refreshToken, {
       secret: this.REFRESH_TOKEN_SECRET,
     });
