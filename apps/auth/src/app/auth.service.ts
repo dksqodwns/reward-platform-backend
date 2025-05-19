@@ -1,9 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   AuthLoginPayload,
   AuthRefreshTokenPayload,
@@ -21,6 +16,8 @@ import {
 } from '../schemas';
 import { Model } from 'mongoose';
 import { PasswordEncoder, TokenService } from '../utils';
+import { RpcException } from '@nestjs/microservices';
+import { ErrorCode } from '@common/error-code.enum';
 
 @Injectable()
 export class AuthService {
@@ -49,8 +46,10 @@ export class AuthService {
   async userRegister(body: AuthRegisterPayload) {
     const isExistUser = await this.userModel.exists({ email: body.email });
     if (isExistUser) {
-      // TODO: Custom Exception을 생성해서 주는게 낫지 않을까? 하는 의문이 든다.
-      throw new ConflictException('이미 가입 된 이메일 입니다.');
+      throw new RpcException({
+        code: ErrorCode.CONFLICT,
+        message: '이미 가입 된 이메일 입니다.',
+      });
     }
     const hashedPassword = await this.passwordEncoder.encode(body.password);
     const user = await this.userModel.create({
@@ -74,17 +73,25 @@ export class AuthService {
   async userLogin(body: AuthLoginPayload) {
     const user = await this.userModel.findOne({ email: body.email });
     if (!user) {
-      throw new UnauthorizedException(
-        '이메일 또는 비밀번호가 올바르지 않습니다.'
-      );
+      throw new RpcException({
+        code: ErrorCode.BAD_REQUEST,
+        message: '이메일 또는 비밀번호가 올바르지 않습니다.',
+      });
     }
     const correctPassword = await this.passwordEncoder.compare(
       body.password,
       user.password
     );
     if (!correctPassword) {
-      throw new UnauthorizedException(
-        '이메일 또는 비밀번호가 올바르지 않습니다.'
+      throw new RpcException({
+        code: ErrorCode.BAD_REQUEST,
+        message: '이메일 또는 비밀번호가 올바르지 않습니다.',
+      });
+    }
+    if (!user.hasLoggedIn) {
+      await this.userModel.updateOne(
+        { _id: user._id },
+        { $set: { hasLoggedIn: true } }
       );
     }
     const accessTokenData = await this.tokenService.createAccessToken(user);
@@ -107,29 +114,37 @@ export class AuthService {
 
   async userRefreshAccessToken(oldToken: string | undefined) {
     if (!oldToken) {
-      throw new UnauthorizedException('리프레시 토큰이 없습니다.');
+      throw new RpcException({
+        code: ErrorCode.UNAUTHORIZED,
+        message: '인증 정보가 올바르지 않습니다.',
+      });
     }
     let payload: AuthRefreshTokenPayload;
     try {
       payload = await this.tokenService.verifyRefreshToken(oldToken);
     } catch (e) {
-      throw new UnauthorizedException(
-        `유효하지 않은 리프레시 토큰 입니다. error=${e}`
-      );
+      throw new RpcException({
+        code: ErrorCode.UNAUTHORIZED,
+        message: `유효하지 않은 리프레시 토큰 입니다. error=${e}`,
+      });
     }
 
     const record = await this.refreshTokenModel.findOne({
       refreshToken: oldToken,
     });
     if (!record || record.expiresAt < new Date()) {
-      throw new UnauthorizedException(
-        '리프레시 토큰이 만료되었거나, 존재하지 않습니다.'
-      );
+      throw new RpcException({
+        code: ErrorCode.UNAUTHORIZED,
+        message: `유효하지 않은 리프레시 토큰 입니다.`,
+      });
     }
 
     const user = await this.userModel.findOne({ userId: payload.userId });
     if (!user) {
-      throw new UnauthorizedException('존재하지 않는 사용자 입니다.');
+      throw new RpcException({
+        code: ErrorCode.NOT_FOUND,
+        message: `존재하지 않는 사용자 입니다.`,
+      });
     }
 
     const { accessToken, ...data } = await this.tokenService.createAccessToken(
@@ -192,7 +207,10 @@ export class AuthService {
     const { userId, roles } = payload;
     const user = await this.userModel.findOne({ _id: userId });
     if (!user) {
-      throw new NotFoundException(`유저를 찾을 수 없습니다. userId: ${userId}`);
+      throw new RpcException({
+        code: ErrorCode.NOT_FOUND,
+        message: `존재하지 않는 사용자 입니다. userId=${userId}`,
+      });
     }
 
     user.roles = roles;

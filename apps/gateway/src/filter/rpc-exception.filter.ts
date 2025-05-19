@@ -16,7 +16,6 @@ export class RpcExceptionFilter implements ExceptionFilter {
       code?: string;
       message?: string;
     };
-    console.log('필터 걸림: ', errorObj);
     const code = errorObj.code as ErrorCode;
 
     const status =
@@ -26,9 +25,6 @@ export class RpcExceptionFilter implements ExceptionFilter {
         [ErrorCode.UNAUTHORIZED]: HttpStatus.UNAUTHORIZED,
         [ErrorCode.BAD_REQUEST]: HttpStatus.BAD_REQUEST,
       }[code] || HttpStatus.INTERNAL_SERVER_ERROR;
-
-    console.log('필터 code: ', code);
-    console.log('필터 status: ', status);
 
     response.status(status).json({
       statusCode: status,

@@ -1,27 +1,31 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { catchError, lastValueFrom, throwError } from 'rxjs';
 import { EventCreatePayload, EventCreateRewardPayload } from '@payload/event';
 import { EventDefaultQueries } from '@payload/event/queries/event.default.queries';
 import { EventGetListPayload } from '@payload/event/rpc/event.get-list.payload';
 import { EventCreateRewardRpcPayload } from '@payload/event/rpc/event.create-reward.rpc.payload';
-import { ErrorCode } from '@common/error-code.enum';
+import { BaseGatewayService } from '../base.gateway.service';
 
 @Injectable()
-export class EventGatewayService {
-  constructor(@Inject('EVENT_SERVICE') private readonly client: ClientProxy) {}
+export class EventGatewayService extends BaseGatewayService {
+  constructor(@Inject('EVENT_SERVICE') client: ClientProxy) {
+    super(client);
+  }
 
   async createEvent(payload: EventCreatePayload) {
-    return lastValueFrom(this.client.send({ cmd: 'event:create' }, payload));
+    // return lastValueFrom(this.client.send({ cmd: 'event:create' }, payload));
+    return this.sendMessage('event:create', payload);
   }
 
   async getEventList(query: EventDefaultQueries) {
     const payload: EventGetListPayload = { ...query };
-    return lastValueFrom(this.client.send({ cmd: 'event:getList' }, payload));
+    // return lastValueFrom(this.client.send({ cmd: 'event:getList' }, payload));
+    return this.sendMessage('event:getList', payload);
   }
 
   async getEventByEventKey(key: string) {
-    return lastValueFrom(this.client.send({ cmd: 'event:get' }, key));
+    // return lastValueFrom(this.client.send({ cmd: 'event:get' }, key));
+    return this.sendMessage('event:get', key);
   }
 
   async createEventReward(
@@ -34,33 +38,21 @@ export class EventGatewayService {
       reward: dto,
       createdBy,
     };
-    return lastValueFrom(
-      this.client.send({ cmd: 'event:createReward' }, payload)
-    );
+    // return lastValueFrom(
+    //   this.client.send({ cmd: 'event:createReward' }, payload)
+    // );
+    return this.sendMessage('event:createReward', payload);
   }
 
   async getEventRewardList(key: string) {
-    return lastValueFrom(
-      this.client.send({ cmd: 'event:getRewardList' }, key).pipe(
-        catchError((err) => {
-          const { code, message } = err;
-          const status =
-            code === ErrorCode.NOT_FOUND
-              ? HttpStatus.NOT_FOUND
-              : code === ErrorCode.CONFLICT
-              ? HttpStatus.CONFLICT
-              : code === ErrorCode.UNAUTHORIZED
-              ? HttpStatus.UNAUTHORIZED
-              : HttpStatus.INTERNAL_SERVER_ERROR;
-          return throwError(() => new HttpException(message, status));
-        })
-      )
-    );
+    // return lastValueFrom(this.client.send({ cmd: 'event:getRewardList' }, key));
+    return this.sendMessage('event:getRewardList', key);
   }
 
   async getRewardByRewardKey(rewardKey: string) {
-    return lastValueFrom(
-      this.client.send({ cmd: 'event:getReward' }, rewardKey)
-    );
+    // return lastValueFrom(
+    //   this.client.send({ cmd: 'event:getReward' }, rewardKey)
+    // );
+    return this.sendMessage('event:getReward', rewardKey);
   }
 }
