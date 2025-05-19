@@ -8,24 +8,25 @@ import {
   Query,
   Req,
   Res,
-  UseGuards,
 } from '@nestjs/common';
 import { AuthGatewayService } from './auth.gateway.service';
 import { AuthLoginBodies, AuthRegisterBodies } from '@payload/auth';
 import { Request, Response } from 'Express';
-import { JwtAuthGuard } from '../../guards/jwt.guard';
 import { AuthDefaultQueries } from '../../dto/queries/auth.default.queries';
+import { Public, Roles } from '@common/decorators';
 
 @Controller('auth')
 export class AuthGatewayController {
   constructor(private readonly authGatewayService: AuthGatewayService) {}
 
   @Post('register')
+  @Public()
   async userRegister(@Body() body: AuthRegisterBodies) {
     return await this.authGatewayService.userRegister(body);
   }
 
   @Post('login')
+  @Public()
   async userLogin(
     @Body() body: AuthLoginBodies,
     @Res({ passthrough: true }) res: Response
@@ -78,7 +79,6 @@ export class AuthGatewayController {
    * TODO: 유저 개개인을 조회하는 함수이지만, :id 같이 파라미터를 통해서 유저를 조회 할 수있는 API가 따로 필요할 것 같음
    */
   @Get('profile')
-  @UseGuards(JwtAuthGuard)
   async userProfile(@Req() req: Request) {
     const user = req.user;
     console.log('게이트웨이 유저: ', user);
@@ -88,13 +88,15 @@ export class AuthGatewayController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('users')
-  async getUserListHandler(@Query() query: AuthDefaultQueries) {
+  async getUserListHandler(
+    @Req() req: Request,
+    @Query() query: AuthDefaultQueries
+  ) {
+    console.log('req.user: ', req.user);
     return await this.authGatewayService.getUserList(query);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('users/:id')
   async getUserByUserId(@Req() req: Request, @Param('id') id: string) {
     const user = await this.authGatewayService.getUserByUserId(id);
@@ -111,9 +113,9 @@ export class AuthGatewayController {
    * @param req
    * @param id
    */
-  @UseGuards(JwtAuthGuard)
   @Patch('users/:id/role')
-  async userRoleUpdate(@Req() req: Request, @Param('id') id: string) {
+  @Roles('ADMIN')
+  async userRoleUpdate(@Req() req: Request, @Param('id') userId: string) {
     return;
   }
 }

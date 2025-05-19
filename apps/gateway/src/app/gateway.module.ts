@@ -8,6 +8,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 import { JwtAuthGuard } from '../guards/jwt.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from '../guards/roles.guard';
 
 @Module({
   imports: [
@@ -15,20 +17,12 @@ import { JwtAuthGuard } from '../guards/jwt.guard';
       {
         name: 'AUTH_SERVICE',
         transport: Transport.TCP,
-        options: {
-          host: '::',
-          port: 3001,
-        },
+        options: { host: '::', port: 3001 },
       },
-    ]),
-    ClientsModule.register([
       {
         name: 'EVENT_SERVICE',
         transport: Transport.TCP,
-        options: {
-          host: '::',
-          port: 3002,
-        },
+        options: { host: '::', port: 3002 },
       },
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -42,8 +36,15 @@ import { JwtAuthGuard } from '../guards/jwt.guard';
     AuthGatewayService,
     EventGatewayService,
     JwtStrategy,
-    JwtAuthGuard,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
-  exports: [PassportModule, JwtModule, JwtAuthGuard],
+  exports: [PassportModule, JwtModule],
 })
 export class GatewayModule {}
