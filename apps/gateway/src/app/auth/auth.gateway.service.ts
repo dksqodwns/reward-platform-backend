@@ -3,6 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { AuthLoginBodies, AuthRegisterBodies } from '@payload/auth';
 import { lastValueFrom } from 'rxjs';
 import { AuthUserResponsePayload } from '@payload/auth/auth.response.payload';
+import { AuthDefaultQueries } from '../../dto/queries/auth.default.queries';
 
 @Injectable()
 export class AuthGatewayService {
@@ -11,7 +12,7 @@ export class AuthGatewayService {
   async getUserByUserId(userId: string) {
     return lastValueFrom(
       this.client.send<AuthUserResponsePayload | null>(
-        { cmd: 'get:user' },
+        { cmd: 'auth:user' },
         userId
       )
     );
@@ -20,7 +21,7 @@ export class AuthGatewayService {
   async userRegister(body: AuthRegisterBodies) {
     return lastValueFrom(
       this.client.send<{ success: boolean; data: any }>(
-        { cmd: 'register' },
+        { cmd: 'auth:register' },
         body
       )
     );
@@ -31,7 +32,7 @@ export class AuthGatewayService {
       this.client.send<{
         success: boolean;
         data: { accessToken: string; refreshToken: string };
-      }>({ cmd: 'login' }, body)
+      }>({ cmd: 'auth:login' }, body)
     );
   }
 
@@ -40,7 +41,11 @@ export class AuthGatewayService {
       this.client.send<{
         success: boolean;
         data: { accessToken: string; refreshToken: string };
-      }>({ cmd: 'refresh' }, oldToken)
+      }>({ cmd: 'auth:refresh' }, oldToken)
     );
+  }
+
+  async getUserList(query: AuthDefaultQueries) {
+    return lastValueFrom(this.client.send({ cmd: 'auth:userList' }, query));
   }
 }

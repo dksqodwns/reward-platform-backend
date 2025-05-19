@@ -5,12 +5,16 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthGatewayService } from './auth.gateway.service';
 import { AuthLoginBodies, AuthRegisterBodies } from '@payload/auth';
 import { Request, Response } from 'Express';
+import { JwtAuthGuard } from '../../guards/jwt.guard';
+import { AuthDefaultQueries } from '../../dto/queries/auth.default.queries';
 
 @Controller('auth')
 export class AuthGatewayController {
@@ -74,24 +78,27 @@ export class AuthGatewayController {
    * TODO: 유저 개개인을 조회하는 함수이지만, :id 같이 파라미터를 통해서 유저를 조회 할 수있는 API가 따로 필요할 것 같음
    */
   @Get('profile')
+  @UseGuards(JwtAuthGuard)
   async userProfile(@Req() req: Request) {
-    return;
+    const user = req.user;
+    console.log('게이트웨이 유저: ', user);
+    return {
+      success: true,
+      data: user,
+    };
   }
 
-  /**
-   * 유저 리스트를 조회하는 함수
-   * TODO: 기본적인 쿼리 스트링에 대한 처리가 필요할 것
-   * @param req
-   */
+  @UseGuards(JwtAuthGuard)
   @Get('users')
-  async getUsers(@Req() req: Request) {
-    return;
+  async getUserListHandler(@Query() query: AuthDefaultQueries) {
+    return await this.authGatewayService.getUserList(query);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('users/:id')
   async getUserByUserId(@Req() req: Request, @Param('id') id: string) {
     const user = await this.authGatewayService.getUserByUserId(id);
-    
+    // TODO: 유저가 없을 경우 서비스에서 404 에러 내줘야 함
     return {
       success: true,
       data: user,
@@ -104,6 +111,7 @@ export class AuthGatewayController {
    * @param req
    * @param id
    */
+  @UseGuards(JwtAuthGuard)
   @Patch('users/:id/role')
   async userRoleUpdate(@Req() req: Request, @Param('id') id: string) {
     return;

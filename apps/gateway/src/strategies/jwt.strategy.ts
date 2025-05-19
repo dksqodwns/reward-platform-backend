@@ -10,7 +10,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: true,
-      secretOrKey: 'JWT_ACCESS_TOKEN_KEY',
+      secretOrKey: 'JWT_SECRET_KEY',
     });
   }
 
@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         new UnauthorizedException('유효하지 않은 사용자 입니다.'),
         false
       );
-    
+
     return done(null, user);
   }
 }

@@ -11,8 +11,8 @@ import {
 @Injectable()
 export class TokenService {
   // TODO: configService나 env에 넣어서 관리하게 변경이 필요함
-  private readonly ACCESS_TOKEN_SECRET = 'JWT_ACCESS_SECRET';
-  private readonly REFRESH_TOKEN_SECRET = 'JWT_REFRESH_TOKEN_SECRET';
+  private readonly ACCESS_TOKEN_SECRET = 'JWT_SECRET_KEY';
+  private readonly REFRESH_TOKEN_SECRET = 'JWT_SECRET_KEY';
 
   constructor(private readonly jwtService: JwtService) {}
 

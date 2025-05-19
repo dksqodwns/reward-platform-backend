@@ -7,6 +7,7 @@ import {
   AuthLoginBodies,
   AuthRefreshTokenPayload,
   AuthRegisterBodies,
+  UserListQueryPayload,
 } from '@payload/auth';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -147,6 +148,40 @@ export class AuthService {
       data: {
         accessToken,
         refreshToken,
+      },
+    };
+  }
+
+  async getUserList(query: UserListQueryPayload) {
+    const { sort, filter, omit, page, limit } = query;
+    const conditions = {};
+
+    if (filter) conditions[filter.key] = filter.value;
+    if (omit) conditions[omit.key] = omit.value;
+
+    const sortOption = {};
+    if (sort) {
+      sortOption[sort.key] = sort.order === 'asc' ? 1 : -1;
+    }
+    const skip = (page - 1) * limit;
+    const [total, data] = await Promise.all([
+      this.userModel.countDocuments(conditions),
+      this.userModel
+        .find(conditions)
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limit)
+        .select('-password -__v')
+        .lean(),
+    ]);
+
+    return {
+      data,
+      metadata: {
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        total,
       },
     };
   }

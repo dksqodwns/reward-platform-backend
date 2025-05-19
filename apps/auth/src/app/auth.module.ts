@@ -34,7 +34,7 @@ import { JwtModule } from '@nestjs/jwt';
         }),
       });
        * */
-      secret: 'JWT_ACCESS_SECRET',
+      secret: 'JWT_SECRET_KEY',
       signOptions: { expiresIn: '10m' },
     }),
   ],
