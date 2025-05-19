@@ -1,9 +1,10 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { EventCreatePayload } from '@payload/event';
+import { EventCreatePayload, EventRewardEmbeddedPayload } from '@payload/event';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EventDocument, UserEvent, UserEventDocument } from '../schemas';
 import { EventGetListPayload } from '@payload/event/rpc/event.get-list.payload';
+import { EventCreateRewardRpcPayload } from '@payload/event/rpc/event.create-reward.rpc.payload';
 
 @Injectable()
 export class EventService {
@@ -73,5 +74,56 @@ export class EventService {
     if (!event) return null;
 
     return { success: true, data: event };
+  }
+
+  async createEventReward(payload: EventCreateRewardRpcPayload) {
+    const { key, reward } = payload;
+    const event = await this.eventModel.findOne({ key });
+    if (!event) return null; // TOOD: success: false로 리턴해서 게이트웨이에서 에러 처리?
+    if (event.rewards.some((r) => r.rewardKey === reward.rewardKey)) {
+      return null; // 이미 등록된 보상키 입니다.
+    }
+
+    event.rewards.push(reward);
+    const updated = await event.save();
+
+    return { success: true, data: updated };
+  }
+
+  async getEventRewardList(key: string) {
+    const event = await this.eventModel.findOne({ key }).lean().exec();
+    if (!event) return null; // NOT_FOUND
+
+    const data = event.rewards.map((reward) => ({
+      eventKey: event.key,
+      reward: {
+        rewardKey: reward.rewardKey,
+        amount: reward.amount,
+        maxQuantity: reward.maxQuantity,
+      } as EventRewardEmbeddedPayload,
+    }));
+
+    return { success: true, data };
+  }
+
+  async getRewardByRewardKey(rewardKey: string) {
+    const docs = await this.eventModel
+      .find(
+        { 'rewards.rewardKey': rewardKey },
+        { key: 1, name: 1, 'rewards.$': 1 }
+      )
+      .lean()
+      .exec();
+
+    const data = docs.map((doc) => ({
+      eventKey: doc.key,
+      reward: {
+        rewardKey: doc.rewards[0].rewardKey,
+        amount: doc.rewards[0].amount,
+        maxQuantity: doc.rewards[0].maxQuantity,
+      } as EventRewardEmbeddedPayload,
+    }));
+
+    return { success: true, data };
   }
 }

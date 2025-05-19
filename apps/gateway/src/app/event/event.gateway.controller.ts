@@ -16,6 +16,7 @@ import { Permissions } from '@common/decorators';
 import { AuthUserResponsePayload, Permission } from '@payload/auth';
 import { JwtAuthGuard, PermissionsGuard } from '../../guards';
 import { EventDefaultQueries } from '@payload/event/queries/event.default.queries';
+import { EventCreateRewardPayload } from '@payload/event';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('events')
@@ -44,5 +45,26 @@ export class EventGatewayController {
   @Get(':key')
   async getEventByEventKeyHandler(@Param('key') key: string) {
     return this.eventGatewayService.getEventByEventKey(key);
+  }
+
+  @Post(':key/rewards')
+  async createEventRewardHandler(
+    @Param('key') key: string,
+    @Body() dto: EventCreateRewardPayload,
+    @Req() req: Request
+  ) {
+    const user = req.user as AuthUserResponsePayload;
+    const createdBy = user.userId;
+    return this.eventGatewayService.createEventReward(key, dto, createdBy);
+  }
+
+  @Get(':key/rewards')
+  async getEventRewardList(@Param('key') key: string) {
+    return this.eventGatewayService.getEventRewardList(key);
+  }
+
+  @Get('/rewards/:rewardKey')
+  async getRewardByRewardKey(@Param('rewardKey') rewardKey: string) {
+    return this.eventGatewayService.getRewardByRewardKey(rewardKey);
   }
 }

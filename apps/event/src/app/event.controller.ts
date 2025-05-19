@@ -3,6 +3,7 @@ import { EventService } from './event.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { EventCreatePayload } from '@payload/event';
 import { EventGetListPayload } from '@payload/event/rpc/event.get-list.payload';
+import { EventCreateRewardRpcPayload } from '@payload/event/rpc/event.create-reward.rpc.payload';
 
 @Controller()
 export class EventController {
@@ -21,5 +22,20 @@ export class EventController {
   @MessagePattern({ cmd: 'event:get' })
   async getEventByEventKey(key: string) {
     return this.eventService.getEventByEventKey(key);
+  }
+
+  @MessagePattern({ cmd: 'event:createReward' })
+  async createEventReward(@Payload() payload: EventCreateRewardRpcPayload) {
+    return this.eventService.createEventReward(payload);
+  }
+
+  @MessagePattern({ cmd: 'event:getRewardList' })
+  async getEventRewardList(key: string) {
+    return this.eventService.getEventRewardList(key);
+  }
+
+  @MessagePattern({ cmd: 'event:getReward' })
+  async getRewardByRewardKey(rewardKey: string) {
+    return this.eventService.getRewardByRewardKey(rewardKey);
   }
 }

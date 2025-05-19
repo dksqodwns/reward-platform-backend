@@ -1,9 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
-import { EventCreatePayload } from '@payload/event';
+import { EventCreatePayload, EventCreateRewardPayload } from '@payload/event';
 import { EventDefaultQueries } from '@payload/event/queries/event.default.queries';
 import { EventGetListPayload } from '@payload/event/rpc/event.get-list.payload';
+import { EventCreateRewardRpcPayload } from '@payload/event/rpc/event.create-reward.rpc.payload';
 
 @Injectable()
 export class EventGatewayService {
@@ -13,12 +14,37 @@ export class EventGatewayService {
     return lastValueFrom(this.client.send({ cmd: 'event:create' }, payload));
   }
 
-  getEventList(query: EventDefaultQueries) {
+  async getEventList(query: EventDefaultQueries) {
     const payload: EventGetListPayload = { ...query };
     return lastValueFrom(this.client.send({ cmd: 'event:getList' }, payload));
   }
 
-  getEventByEventKey(key: string) {
+  async getEventByEventKey(key: string) {
     return lastValueFrom(this.client.send({ cmd: 'event:get' }, key));
+  }
+
+  async createEventReward(
+    key: string,
+    dto: EventCreateRewardPayload,
+    createdBy: string
+  ) {
+    const payload: EventCreateRewardRpcPayload = {
+      key,
+      reward: dto,
+      createdBy,
+    };
+    return lastValueFrom(
+      this.client.send({ cmd: 'event:createReward' }, payload)
+    );
+  }
+
+  async getEventRewardList(key: string) {
+    return lastValueFrom(this.client.send({ cmd: 'event:getRewardList' }, key));
+  }
+
+  async getRewardByRewardKey(rewardKey: string) {
+    return lastValueFrom(
+      this.client.send({ cmd: 'event:getReward' }, rewardKey)
+    );
   }
 }
