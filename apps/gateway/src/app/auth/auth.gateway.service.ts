@@ -1,9 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { AuthLoginBodies, AuthRegisterBodies } from '@payload/auth';
+import {
+  AuthDefaultQueries,
+  AuthLoginPayload,
+  AuthRegisterPayload,
+  AuthUpdateUserRolePayload,
+  AuthUserResponsePayload,
+  Role,
+} from '@payload/auth';
 import { lastValueFrom } from 'rxjs';
-import { AuthUserResponsePayload } from '@payload/auth/auth.response.payload';
-import { AuthDefaultQueries } from '../../dto/queries/auth.default.queries';
 
 @Injectable()
 export class AuthGatewayService {
@@ -18,7 +23,7 @@ export class AuthGatewayService {
     );
   }
 
-  async userRegister(body: AuthRegisterBodies) {
+  async userRegister(body: AuthRegisterPayload) {
     return lastValueFrom(
       this.client.send<{ success: boolean; data: any }>(
         { cmd: 'auth:register' },
@@ -27,7 +32,7 @@ export class AuthGatewayService {
     );
   }
 
-  async userLogin(body: AuthLoginBodies) {
+  async userLogin(body: AuthLoginPayload) {
     return lastValueFrom(
       this.client.send<{
         success: boolean;
@@ -47,5 +52,12 @@ export class AuthGatewayService {
 
   async getUserList(query: AuthDefaultQueries) {
     return lastValueFrom(this.client.send({ cmd: 'auth:userList' }, query));
+  }
+
+  userRoleUpdate(userId: string, roles: Role[]) {
+    const payload: AuthUpdateUserRolePayload = { userId, roles };
+    return lastValueFrom(
+      this.client.send({ cmd: 'auth:updateUserRole' }, payload)
+    );
   }
 }

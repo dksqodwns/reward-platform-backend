@@ -1,4 +1,4 @@
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type UserEventDocument = HydratedDocument<UserEvent>;
@@ -20,13 +20,16 @@ export class UserEvent {
   @Prop({ enum: RewardStatus, default: RewardStatus.PENDING })
   status: RewardStatus;
 
-  @Prop({ type: Date })
-  requestedAt: Date;
+  @Prop({ required: true })
+  repeatable: boolean;
 
-  // 이벤트 별 추가 정보 데이터
-  @Prop({ type: Object })
+  @Prop({ type: MongooseSchema.Types.Mixed, default: {} })
   extraData?: any;
 }
+
 export const UserEventSchema = SchemaFactory.createForClass(UserEvent);
 
-UserEventSchema.index({ userId: 1, eventKey: 1 }, { unique: true });
+UserEventSchema.index(
+  { userId: 1, eventKey: 1 },
+  { unique: true, partialFilterExpression: { repeatable: false } }
+);

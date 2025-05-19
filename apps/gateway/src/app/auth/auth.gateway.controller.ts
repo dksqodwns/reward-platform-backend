@@ -10,11 +10,15 @@ import {
   Res,
 } from '@nestjs/common';
 import { AuthGatewayService } from './auth.gateway.service';
-import { AuthLoginBodies, AuthRegisterBodies } from '@payload/auth';
+import {
+  AuthDefaultQueries,
+  AuthLoginPayload,
+  AuthRegisterPayload,
+  AuthUpdateUserRoleBodies,
+  Permission,
+} from '@payload/auth';
 import { Request, Response } from 'Express';
-import { AuthDefaultQueries } from '../../dto/queries/auth.default.queries';
 import { Permissions, Public } from '@common/decorators';
-import { Permission } from '@payload/auth/permissions.enum';
 
 @Controller('auth')
 export class AuthGatewayController {
@@ -22,14 +26,14 @@ export class AuthGatewayController {
 
   @Post('register')
   @Public()
-  async userRegister(@Body() body: AuthRegisterBodies) {
+  async userRegister(@Body() body: AuthRegisterPayload) {
     return await this.authGatewayService.userRegister(body);
   }
 
   @Post('login')
   @Public()
   async userLogin(
-    @Body() body: AuthLoginBodies,
+    @Body() body: AuthLoginPayload,
     @Res({ passthrough: true }) res: Response
   ) {
     const result = await this.authGatewayService.userLogin(body);
@@ -74,7 +78,6 @@ export class AuthGatewayController {
     return { accessToken };
   }
 
-  // TODO: 로그아웃 만들까?
   /**
    * 유저 본인의 프로필 조회하는 함수
    * TODO: 유저 개개인을 조회하는 함수이지만, :id 같이 파라미터를 통해서 유저를 조회 할 수있는 API가 따로 필요할 것 같음
@@ -82,7 +85,6 @@ export class AuthGatewayController {
   @Get('profile')
   async userProfile(@Req() req: Request) {
     const user = req.user;
-    console.log('게이트웨이 유저: ', user);
     return {
       success: true,
       data: user,
@@ -90,16 +92,12 @@ export class AuthGatewayController {
   }
 
   @Get('users')
-  async getUserListHandler(
-    @Req() req: Request,
-    @Query() query: AuthDefaultQueries
-  ) {
-    console.log('req.user: ', req.user);
+  async getUserListHandler(@Query() query: AuthDefaultQueries) {
     return await this.authGatewayService.getUserList(query);
   }
 
   @Get('users/:id')
-  async getUserByUserId(@Req() req: Request, @Param('id') id: string) {
+  async getUserByUserId(@Param('id') id: string) {
     const user = await this.authGatewayService.getUserByUserId(id);
     // TODO: 유저가 없을 경우 서비스에서 404 에러 내줘야 함
     return {
@@ -108,15 +106,12 @@ export class AuthGatewayController {
     };
   }
 
-  /**
-   * 유저의 ROLE을 업데이트 하는 함수
-   * TODO: ADMIN 유저만 접근 가능하도록 ROLE 가드가 있어야 함
-   * @param req
-   * @param id
-   */
   @Patch('users/:id/role')
   @Permissions(Permission.USER_UPDATE)
-  async userRoleUpdate(@Req() req: Request, @Param('id') userId: string) {
-    return;
+  async userRoleUpdate(
+    @Param('id') userId: string,
+    @Body() body: AuthUpdateUserRoleBodies
+  ) {
+    return this.authGatewayService.userRoleUpdate(userId, body.roles);
   }
 }

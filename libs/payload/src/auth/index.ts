@@ -1,4 +1,6 @@
-export * from './auth.jwt.payload';
-export * from './auth.response.payload';
-export * from './auth.bodies.dto';
-export * from './auth.queries.dto';
+export * from './auth.permissions.enum';
+export * from './auth.roles.enum';
+
+export * from './bodies';
+export * from './queries';
+export * from './rpc';

@@ -2,11 +2,12 @@ import { Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
-  AuthLoginBodies,
-  AuthRegisterBodies,
+  AuthLoginPayload,
+  AuthRegisterPayload,
+  AuthUpdateUserRolePayload,
+  AuthUserResponsePayload,
   UserListQueryPayload,
 } from '@payload/auth';
-import { AuthUserResponsePayload } from '@payload/auth/auth.response.payload';
 
 @Controller()
 export class AuthController {
@@ -18,13 +19,13 @@ export class AuthController {
   }
 
   @MessagePattern({ cmd: 'auth:register' })
-  userRegister(@Payload() body: AuthRegisterBodies) {
+  userRegister(@Payload() body: AuthRegisterPayload) {
     return this.authService.userRegister(body);
   }
 
   @MessagePattern({ cmd: 'auth:login' })
-  userLogin(@Payload() body: AuthLoginBodies) {
-    return this.authService.userLogin(body);
+  userLogin(@Payload() payload: AuthLoginPayload) {
+    return this.authService.userLogin(payload);
   }
 
   @MessagePattern({ cmd: 'auth:refresh' })
@@ -35,5 +36,10 @@ export class AuthController {
   @MessagePattern({ cmd: 'auth:userList' })
   getUserList(@Payload() query: UserListQueryPayload) {
     return this.authService.getUserList(query);
+  }
+
+  @MessagePattern({ cmd: 'auth:updateUserRole' })
+  updateUserRole(@Payload() payload: AuthUpdateUserRolePayload) {
+    return this.authService.updateUserRole(payload);
   }
 }

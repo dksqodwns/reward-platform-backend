@@ -1,12 +1,15 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
-  AuthLoginBodies,
+  AuthLoginPayload,
   AuthRefreshTokenPayload,
-  AuthRegisterBodies,
+  AuthRegisterPayload,
+  AuthUpdateUserRolePayload,
+  AuthUserResponsePayload,
   UserListQueryPayload,
 } from '@payload/auth';
 import { InjectModel } from '@nestjs/mongoose';
@@ -17,9 +20,7 @@ import {
   UserDocument,
 } from '../schemas';
 import { Model } from 'mongoose';
-import { PasswordEncoder } from '../utils';
-import { TokenService } from '../utils/token.service';
-import { AuthUserResponsePayload } from '@payload/auth/auth.response.payload';
+import { PasswordEncoder, TokenService } from '../utils';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +46,7 @@ export class AuthService {
     };
   }
 
-  async userRegister(body: AuthRegisterBodies) {
+  async userRegister(body: AuthRegisterPayload) {
     const isExistUser = await this.userModel.exists({ email: body.email });
     if (isExistUser) {
       // TODO: Custom Exception을 생성해서 주는게 낫지 않을까? 하는 의문이 든다.
@@ -70,7 +71,7 @@ export class AuthService {
     };
   }
 
-  async userLogin(body: AuthLoginBodies) {
+  async userLogin(body: AuthLoginPayload) {
     const user = await this.userModel.findOne({ email: body.email });
     if (!user) {
       throw new UnauthorizedException(
@@ -176,12 +177,32 @@ export class AuthService {
     ]);
 
     return {
+      success: true,
       data,
       metadata: {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
         total,
+      },
+    };
+  }
+
+  async updateUserRole(payload: AuthUpdateUserRolePayload) {
+    const { userId, roles } = payload;
+    const user = await this.userModel.findOne({ _id: userId });
+    if (!user) {
+      throw new NotFoundException(`유저를 찾을 수 없습니다. userId: ${userId}`);
+    }
+
+    user.roles = roles;
+    await user.save();
+
+    return {
+      success: true,
+      data: {
+        userId: user._id,
+        roles: user.roles,
       },
     };
   }

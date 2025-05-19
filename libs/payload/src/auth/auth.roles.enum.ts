@@ -1,4 +1,4 @@
-import { Permission } from './permissions.enum';
+import { Permission } from './auth.permissions.enum';
 
 export enum Role {
   USER = 'USER',
