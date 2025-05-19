@@ -1,10 +1,12 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventCreatePayload, EventRewardEmbeddedPayload } from '@payload/event';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EventDocument, UserEvent, UserEventDocument } from '../schemas';
 import { EventGetListPayload } from '@payload/event/rpc/event.get-list.payload';
 import { EventCreateRewardRpcPayload } from '@payload/event/rpc/event.create-reward.rpc.payload';
+import { RpcException } from '@nestjs/microservices';
+import { ErrorCode } from '@common/error-code.enum';
 
 @Injectable()
 export class EventService {
@@ -17,9 +19,10 @@ export class EventService {
   async createEvent(payload: EventCreatePayload) {
     const isExistEvent = await this.eventModel.findOne({ key: payload.key });
     if (isExistEvent) {
-      throw new ConflictException(
-        `Event Key가 ${payload.key}인 이벤트가 이미 존재합니다.`
-      );
+      throw new RpcException({
+        code: ErrorCode.CONFLICT,
+        message: `Event Key가 ${payload.key}인 이벤트가 이미 존재합니다.`,
+      });
     }
 
     const createdEvent = await this.eventModel.create({
@@ -79,7 +82,12 @@ export class EventService {
   async createEventReward(payload: EventCreateRewardRpcPayload) {
     const { key, reward } = payload;
     const event = await this.eventModel.findOne({ key });
-    if (!event) return null; // TOOD: success: false로 리턴해서 게이트웨이에서 에러 처리?
+    if (!event) {
+      throw new RpcException({
+        code: ErrorCode.NOT_FOUND,
+        message: '이벤트를 찾을 수 없습니다.',
+      });
+    }
     if (event.rewards.some((r) => r.rewardKey === reward.rewardKey)) {
       return null; // 이미 등록된 보상키 입니다.
     }
@@ -92,7 +100,13 @@ export class EventService {
 
   async getEventRewardList(key: string) {
     const event = await this.eventModel.findOne({ key }).lean().exec();
-    if (!event) return null; // NOT_FOUND
+    console.log('찾은 이벤트: ', event);
+    if (!event) {
+      throw new RpcException({
+        code: ErrorCode.NOT_FOUND,
+        message: '이벤트를 찾을 수 없습니다.',
+      });
+    }
 
     const data = event.rewards.map((reward) => ({
       eventKey: event.key,

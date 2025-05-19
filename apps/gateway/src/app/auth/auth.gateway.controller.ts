@@ -8,6 +8,7 @@ import {
   Query,
   Req,
   Res,
+  UseFilters,
 } from '@nestjs/common';
 import { AuthGatewayService } from './auth.gateway.service';
 import {
@@ -19,7 +20,9 @@ import {
 } from '@payload/auth';
 import { Request, Response } from 'Express';
 import { Permissions, Public } from '@common/decorators';
+import { RpcExceptionFilter } from '../../filter/rpc-exception.filter';
 
+@UseFilters(RpcExceptionFilter)
 @Controller('auth')
 export class AuthGatewayController {
   constructor(private readonly authGatewayService: AuthGatewayService) {}

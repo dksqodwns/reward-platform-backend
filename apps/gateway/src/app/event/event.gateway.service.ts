@@ -1,10 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
+import { catchError, lastValueFrom, throwError } from 'rxjs';
 import { EventCreatePayload, EventCreateRewardPayload } from '@payload/event';
 import { EventDefaultQueries } from '@payload/event/queries/event.default.queries';
 import { EventGetListPayload } from '@payload/event/rpc/event.get-list.payload';
 import { EventCreateRewardRpcPayload } from '@payload/event/rpc/event.create-reward.rpc.payload';
+import { ErrorCode } from '@common/error-code.enum';
 
 @Injectable()
 export class EventGatewayService {
@@ -39,7 +40,22 @@ export class EventGatewayService {
   }
 
   async getEventRewardList(key: string) {
-    return lastValueFrom(this.client.send({ cmd: 'event:getRewardList' }, key));
+    return lastValueFrom(
+      this.client.send({ cmd: 'event:getRewardList' }, key).pipe(
+        catchError((err) => {
+          const { code, message } = err;
+          const status =
+            code === ErrorCode.NOT_FOUND
+              ? HttpStatus.NOT_FOUND
+              : code === ErrorCode.CONFLICT
+              ? HttpStatus.CONFLICT
+              : code === ErrorCode.UNAUTHORIZED
+              ? HttpStatus.UNAUTHORIZED
+              : HttpStatus.INTERNAL_SERVER_ERROR;
+          return throwError(() => new HttpException(message, status));
+        })
+      )
+    );
   }
 
   async getRewardByRewardKey(rewardKey: string) {

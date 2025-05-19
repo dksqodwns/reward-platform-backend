@@ -6,6 +6,7 @@ import {
   Post,
   Query,
   Req,
+  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import { EventGatewayService } from './event.gateway.service';
@@ -17,7 +18,9 @@ import { AuthUserResponsePayload, Permission } from '@payload/auth';
 import { JwtAuthGuard, PermissionsGuard } from '../../guards';
 import { EventDefaultQueries } from '@payload/event/queries/event.default.queries';
 import { EventCreateRewardPayload } from '@payload/event';
+import { RpcExceptionFilter } from '../../filter/rpc-exception.filter';
 
+@UseFilters(RpcExceptionFilter)
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('events')
 export class EventGatewayController {
