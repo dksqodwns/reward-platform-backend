@@ -10,7 +10,7 @@ export interface FriendInviteParams {
 
 export type ConditionParams =
   | {
-      type: ConditionType.LOGIN_DAYS;
+      type: ConditionType.LOGIN_DAYS_7;
       params: LoginDaysParams;
     }
   | {

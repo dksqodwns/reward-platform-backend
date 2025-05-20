@@ -1,14 +1,18 @@
 // apps/event/src/schemas/event.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
+import { ConditionType } from '@payload/event';
 
 export type EventDocument = HydratedDocument<Event>;
 
 // 조건: AND/OR + 규칙 배열
 @Schema()
-class ConditionRule {
-  @Prop({ required: true })
-  type: string; // ex) 'LOGIN_DAYS', 'INVITE_COUNT'
+export class ConditionRule {
+  @Prop({
+    required: true,
+    enum: Object.values(ConditionType),
+  })
+  type: ConditionType;
   @Prop({ type: MongooseSchema.Types.Mixed, required: true })
   params: any; // ex) { days: 3 } 등
 }
@@ -16,7 +20,7 @@ class ConditionRule {
 const ConditionRuleSchema = SchemaFactory.createForClass(ConditionRule);
 
 @Schema()
-class ConditionGroup {
+export class ConditionGroup {
   @Prop({ required: true, enum: ['AND', 'OR'], default: 'AND' })
   operator: 'AND' | 'OR';
   @Prop({ type: [ConditionRuleSchema], required: true })
@@ -27,9 +31,9 @@ const ConditionGroupSchema = SchemaFactory.createForClass(ConditionGroup);
 
 // 이벤트 보상 자체(수량·한도)
 @Schema()
-class Reward {
+export class Reward {
   @Prop({ required: true })
-  rewardKey: string; // reward_catalog.key 를 참조하는 비즈니스 키
+  rewardKey: string; // reward_metadata.key 를 참조하는 비즈니스 키
   @Prop({ required: true })
   amount: number; // 지급 수량
   @Prop({ required: true, min: 1 })

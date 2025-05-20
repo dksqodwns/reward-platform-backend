@@ -16,8 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@payload/*": ["libs/payload/src/*"],
-      "@common/*": ["libs/common/src/*"],
-    }
+      "@common/*": ["libs/common/src/*"]
+    },
+    "typeRoots": ['./types']
   },
   "exclude": ["node_modules", "tmp"]
 }

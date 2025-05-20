@@ -88,14 +88,35 @@ export class AuthService {
         message: '이메일 또는 비밀번호가 올바르지 않습니다.',
       });
     }
-    if (!user.hasLoggedIn) {
-      await this.userModel.updateOne(
-        { _id: user._id },
-        { $set: { hasLoggedIn: true } }
-      );
-    }
+
     const accessTokenData = await this.tokenService.createAccessToken(user);
     const refreshTokenData = await this.tokenService.createRefreshToken(user);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastLoginAt = user.lastLoginAt;
+    if (lastLoginAt) {
+      const yesterday = new Date(today);
+      yesterday.setDate(lastLoginAt.getDate() - 1);
+
+      if (lastLoginAt.getTime() === yesterday.getTime()) {
+        user.consecutiveLoginDays++;
+      } else if (lastLoginAt.getTime() < yesterday.getTime()) {
+        user.consecutiveLoginDays = 1;
+      }
+    } else {
+      user.consecutiveLoginDays = 1;
+    }
+
+    user.lastLoginAt = today;
+    await this.userModel.updateOne(
+      { _id: user._id },
+      {
+        lastLoginAt: user.lastLoginAt,
+        consecutiveLoginDays: user.consecutiveLoginDays,
+      }
+    );
 
     await this.refreshTokenModel.create({
       userId: user._id.toString(),

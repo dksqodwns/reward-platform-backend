@@ -1,32 +1,27 @@
 // apps/event/src/utils/event-condition.evaluator.ts
 import { Injectable } from '@nestjs/common';
+import { ConditionType } from '@payload/event';
 import { AuthUserResponsePayload } from '@payload/auth';
-import {
-  ConditionGroupPayload,
-  ConditionType,
-  EventConditionPayload,
-} from '@payload/event';
+import { ConditionGroup, ConditionRule } from '../schemas';
 
 @Injectable()
 export class EventConditionEvaluator {
   async evaluateRule(
-    rule: EventConditionPayload,
+    rule: ConditionRule,
     user: AuthUserResponsePayload
   ): Promise<boolean> {
     switch (rule.type) {
-      case ConditionType.FIRST_LOGIN:
-        return user.hasLoggedIn === true;
-
+      case ConditionType.LOGIN_DAYS_7:
+        return user.consecutiveLoginDays >= 7;
       case ConditionType.FRIEND_INVITE:
-        return user.invitesSent > 0;
-
+        return user.invitesSent > 3;
       default:
         return false;
     }
   }
 
   async evaluate(
-    group: ConditionGroupPayload,
+    group: ConditionGroup,
     user: AuthUserResponsePayload
   ): Promise<boolean> {
     const results = await Promise.all(

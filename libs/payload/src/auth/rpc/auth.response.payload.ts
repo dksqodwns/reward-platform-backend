@@ -10,6 +10,6 @@ export interface AuthUserResponsePayload {
   email: string;
   userName: string;
   roles: string[];
-  hasLoggedIn: boolean;
+  consecutiveLoginDays: number;
   invitesSent: number;
 }

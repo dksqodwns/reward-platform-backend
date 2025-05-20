@@ -17,8 +17,11 @@ export class User {
   @Prop({ type: [String], default: ['USER'] })
   roles: string[];
 
-  @Prop({ default: false })
-  hasLoggedIn: boolean;
+  @Prop()
+  lastLoginAt?: Date;
+
+  @Prop({ default: 0 })
+  consecutiveLoginDays: number;
 
   @Prop({ default: 0 })
   invitesSent: number;
