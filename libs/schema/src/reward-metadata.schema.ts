@@ -6,19 +6,19 @@ export type RewardCatalogDocument = HydratedDocument<RewardCatalog>;
 @Schema({ collection: 'reward_metadata', timestamps: true })
 export class RewardCatalog {
   @Prop({ required: true, unique: true })
-  key!: string; // ex) 'WELCOME_POINT', 'WELCOME_COUPON'
+  key!: string;
 
   @Prop({ required: true })
-  name!: string; // UI 노출명, ex) '환영 포인트', '가입 쿠폰'
+  name!: string; 
 
   @Prop({ required: true, enum: ['POINT', 'COUPON', 'ITEM'] })
   type!: 'POINT' | 'COUPON' | 'ITEM';
 
   @Prop({ required: true })
-  unit!: string; // ex) 'P', 'KRW', 'ITEM_ID'
+  unit!: string; 
 
   @Prop({ type: MongooseSchema.Types.Mixed, default: {} })
-  metadata: any; // 추가 속성(ex: 쿠폰 할인율, 만료일 등)
+  metadata: any; 
 }
 
 export const RewardCatalogSchema = SchemaFactory.createForClass(RewardCatalog);
