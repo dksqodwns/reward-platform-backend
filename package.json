@@ -2,7 +2,11 @@
   "name": "@reward-platform-backend/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build:gateway": "npx nx run gateway:build",
+    "build:auth": "npx nx run auth:build",
+    "build:event": "npx nx run event:build"
+  },
   "private": true,
   "dependencies": {
     "@nestjs/common": "^10.0.2",
@@ -42,6 +46,7 @@
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
     "@types/cookie-parser": "^1.4.8",
+    "@types/express": "^4.17.22",
     "@types/jest": "^29.5.12",
     "@types/node": "~18.16.9",
     "@types/passport-jwt": "^4.0.1",

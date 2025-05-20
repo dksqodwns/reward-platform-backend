@@ -1,15 +1,22 @@
-FROM node:18-alpine AS builder
-WORKDIR /app/gateway
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build:gateway
+FROM node:18-alpine AS deps
+WORKDIR /workspace/gateway
+COPY package*.json nx.json ./
+COPY tsconfig.base.json .
 
-FROM node:18-alpine
+RUN mkdir -p node_modules/.cache
+RUN npm ci
+
+FROM deps AS builder
+WORKDIR /workspace/gateway
+COPY . .
+RUN npx nx run gateway:build:production
+
+FROM node:18-alpine AS runner
 WORKDIR /app/gateway
-COPY --from=builder /app/gateway/dist/apps/gateway ./dist
-COPY --from=builder /app/gateway/node_modules ./node_modules
+
+COPY --from=builder /workspace/gateway/dist/apps/gateway ./dist
+COPY --from=deps /workspace/gateway/node_modules ./node_modules
+
 ENV NODE_ENV=production
 EXPOSE 3000
-
 CMD ["node", "dist/main.js"]

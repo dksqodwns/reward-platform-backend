@@ -18,7 +18,7 @@ import {
   AuthUpdateUserRoleBodies,
   Permission,
 } from '@payload/auth';
-import { Request, Response } from 'Express';
+import { Request, Response } from 'express';
 import { Permissions, Public } from '@common/decorators';
 import { RpcExceptionFilter } from '../../filter/rpc-exception.filter';
 

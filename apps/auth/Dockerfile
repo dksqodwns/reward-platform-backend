@@ -1,15 +1,22 @@
-FROM node:18-alpine AS builder
-WORKDIR /app/auth
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build:auth
+FROM node:18-alpine AS deps
+WORKDIR /workspace/auth
+COPY package*.json nx.json ./
+COPY tsconfig.base.json .
 
-FROM node:18-alpine
+RUN mkdir -p node_modules/.cache
+RUN npm ci
+
+FROM deps AS builder
+WORKDIR /workspace/auth
+COPY . .
+RUN npx nx run auth:build:production
+
+FROM node:18-alpine AS runner
 WORKDIR /app/auth
-COPY --from=builder /app/auth/dist/apps/auth ./dist
-COPY --from=builder /app/auth/node_modules ./node_modules
+
+COPY --from=builder /workspace/auth/dist/apps/auth ./dist
+COPY --from=deps /workspace/auth/node_modules ./node_modules
+
 ENV NODE_ENV=production
 EXPOSE 3001
-
 CMD ["node", "dist/main.js"]

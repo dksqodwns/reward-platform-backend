@@ -1,84 +1,76 @@
 services:
   mongo-auth:
     image: mongo:8.0
-    container_name: mongo-auth
-    restart: always
+    container_name: reward-mongo-auth
     volumes:
-      - mongo-auth-data:/data/db/reward
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 12qwaszx
-      MONGO_INITDB_DATABASE: reward_auth
-    ports:
-      - "27017:27017"
-
-  mongo-event:
-    image: mongo:8.0
-    container_name: mongo-event
-    restart: always
-    volumes:
-      - mongo-event-data:/data/db/reward
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 12qwaszx
-      MONGO_INITDB_DATABASE: reward_event
-    ports:
-      - "27018:27017"
-
-  gateway:
-    build:
-      context: .
-      dockerfile: apps/gateway/Dockerfile
-    container_name: reward-platform-gateway
-    restart: on-failure
-    environment:
-      AUTH_SERVICE_HOST: auth
-      AUTH_SERVICE_PORT: 3001
-      EVENT_SERVICE_HOST: event
-      EVENT_SERVICE_PORT: 3002
-      JWT_SECRET_KEY: JWT_SECRET_KEY
-    depends_on:
-      - auth
-      - event
-    ports:
-      - "3000:3000"
+      - mongo-auth-data:/data/db
+    networks:
+      - backend
 
   auth:
     build:
       context: .
       dockerfile: apps/auth/Dockerfile
     container_name: reward-auth
-    restart: on-failure
+    restart: always
     environment:
-      AUTH_MONGO_URI: mongodb://root:12qwaszx@mongo-auth:27017/reward_auth?authSource=admin
-      JWT_SECRET_KEY: JWT_SECRET_KEY
-      JWT_EXPIRES_IN: 10m
-      JWT_REFRESH_EXPIRES_IN: 1d
+      AUTH_MONGO_URI: mongodb://mongo-auth:27017/reward_auth
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
     depends_on:
       - mongo-auth
     ports:
       - "3001:3001"
+    networks:
+      - backend
+
+  mongo-event:
+    image: mongo:8.0
+    container_name: reward-mongo-event
+    volumes:
+      - mongo-event-data:/data/db
+    networks:
+      - backend
 
   event:
     build:
       context: .
       dockerfile: apps/event/Dockerfile
     container_name: reward-event
-    restart: on-failure
+    restart: always
     environment:
-      AUTH_MONGO_URI: mongodb://root:12qwaszx@mongo-auth:27017/reward_event?authSource=admin
-      JWT_SECRET_KEY: JWT_SECRET_KEY
-      JWT_EXPIRES_IN: 10m
-      JWT_REFRESH_EXPIRES_IN: 1d
+      EVENT_MONGO_URI: mongodb://mongo-event:27017/reward_event
     depends_on:
       - mongo-event
     ports:
       - "3002:3002"
+    networks:
+      - backend
+
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    container_name: reward-gateway
+    restart: always
+    environment:
+      AUTH_SERVICE_HOST: auth
+      AUTH_SERVICE_PORT: 3001
+      EVENT_SERVICE_HOST: event
+      EVENT_SERVICE_PORT: 3002
+    depends_on:
+      - auth
+      - event
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
 
 volumes:
   mongo-auth-data:
   mongo-event-data:
 
 networks:
-  reward:
+  backend:
     driver: bridge

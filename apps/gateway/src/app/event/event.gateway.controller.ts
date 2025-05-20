@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { EventGatewayService } from './event.gateway.service';
 
-import { Request } from 'Express';
+import { Request } from 'express';
 import { EventCreateBodies } from '@payload/event/bodies/event.create-event.payload';
 import { Permissions } from '@common/decorators';
 import { AuthUserResponsePayload, Permission } from '@payload/auth';
