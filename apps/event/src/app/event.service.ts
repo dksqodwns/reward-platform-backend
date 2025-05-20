@@ -2,12 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EventCreatePayload, EventRewardEmbeddedPayload } from '@payload/event';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  EventDocument,
-  RewardStatus,
-  UserEvent,
-  UserEventDocument,
-} from '../schemas';
 import { EventGetListPayload } from '@payload/event/rpc/event.get-list.payload';
 import { EventCreateRewardRpcPayload } from '@payload/event/rpc/event.create-reward.rpc.payload';
 import { RpcException } from '@nestjs/microservices';
@@ -18,6 +12,12 @@ import {
   EventGetRewardRequestListPayload,
   EventGetRewardRequestPayload,
 } from '@payload/event/rpc/event.get-reward-requests.payload';
+import {
+  RewardStatus,
+  UserEvent,
+  UserEventDocument,
+} from '@schema/user-event.schema';
+import { EventDocument } from '@schema/event.schema';
 
 @Injectable()
 export class EventService {

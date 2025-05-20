@@ -13,13 +13,13 @@ export enum RewardStatus {
 @Schema({ collection: 'user_events', timestamps: true })
 export class UserEvent {
   @Prop({ required: true, index: true })
-  userId: string;
+  userId!: string;
 
   @Prop({ required: true, index: true })
-  eventKey: string;
+  eventKey!: string;
 
   @Prop({ enum: RewardStatus, default: RewardStatus.PENDING })
-  status: RewardStatus;
+  status!: RewardStatus;
 
   @Prop({ type: MongooseSchema.Types.Mixed, default: {} })
   extraData?: any;

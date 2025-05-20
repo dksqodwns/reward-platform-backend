@@ -1,5 +1,5 @@
-import { EventGetListPayload } from '@payload/event/rpc/event.get-list.payload';
-import { RewardStatus } from '../../../../../apps/event/src/schemas';
+import { RewardStatus } from '@schema/user-event.schema';
+import { EventGetListPayload } from './event.get-list.payload';
 
 export interface EventGetRewardRequestListPayload extends EventGetListPayload {
   status?: RewardStatus;

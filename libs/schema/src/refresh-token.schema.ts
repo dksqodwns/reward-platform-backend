@@ -6,13 +6,13 @@ export type RefreshTokenDocument = HydratedDocument<RefreshToken>;
 @Schema({ collection: 'refresh_tokens', timestamps: true })
 export class RefreshToken {
   @Prop({ required: true, index: true })
-  userId: string;
+  userId!: string;
 
   @Prop({ required: true, unique: true })
-  refreshToken: string;
+  refreshToken!: string;
 
   @Prop({ required: true })
-  expiresAt: Date;
+  expiresAt!: Date;
 
   @Prop()
   deviceInfo?: string;

@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { RefreshToken, RefreshTokenSchema, User, UserSchema } from '../schemas';
-import { PasswordEncoder } from '../utils';
-import { TokenService } from '../utils/token.service';
+import { PasswordEncoder, TokenService } from '../utils';
 import { JwtModule } from '@nestjs/jwt';
+import { RefreshToken, RefreshTokenSchema } from '@schema/refresh-token.schema';
+import { User, UserSchema } from '@schema/user.schema';
 
 @Module({
   imports: [

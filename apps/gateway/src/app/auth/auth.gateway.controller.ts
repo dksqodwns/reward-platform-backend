@@ -40,10 +40,6 @@ export class AuthGatewayController {
     @Res({ passthrough: true }) res: Response
   ) {
     const result = await this.authGatewayService.userLogin(body);
-    /**
-     * accessToken은 클라이언트에서 메모리에 저장
-     * refreshToken은 DB에 저장
-     */
     const { accessToken, refreshToken } = result.data;
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -81,10 +77,6 @@ export class AuthGatewayController {
     return { accessToken };
   }
 
-  /**
-   * 유저 본인의 프로필 조회하는 함수
-   * TODO: 유저 개개인을 조회하는 함수이지만, :id 같이 파라미터를 통해서 유저를 조회 할 수있는 API가 따로 필요할 것 같음
-   */
   @Get('profile')
   async userProfile(@Req() req: Request) {
     const user = req.user;
@@ -102,7 +94,6 @@ export class AuthGatewayController {
   @Get('users/:id')
   async getUserByUserId(@Param('id') id: string) {
     const user = await this.authGatewayService.getUserByUserId(id);
-    // TODO: 유저가 없을 경우 서비스에서 404 에러 내줘야 함
     return {
       success: true,
       data: user,

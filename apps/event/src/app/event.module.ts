@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
 import { EventController } from './event.controller';
 import { EventService } from './event.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Event, EventSchema, UserEvent, UserEventSchema } from '../schemas';
+import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 import {
   CouponRewardProcessor,
   EventConditionEvaluator,
   PointRewardProcessor,
   RewardProcessorFactory,
 } from '../utils';
+import { EventSchema } from '@schema/event.schema';
+import { UserEvent, UserEventSchema } from '@schema/user-event.schema';
+import { User, UserSchema } from '@schema/user.schema';
+import { RefreshToken, RefreshTokenSchema } from '@schema/refresh-token.schema';
 
 @Module({
   imports: [
@@ -17,11 +20,13 @@ import {
       {
         autoCreate: true,
         autoIndex: true,
-      }
+      } as MongooseModuleOptions
     ),
     MongooseModule.forFeature([
       { name: Event.name, schema: EventSchema },
       { name: UserEvent.name, schema: UserEventSchema },
+      { name: User.name, schema: UserSchema },
+      { name: RefreshToken.name, schema: RefreshTokenSchema },
     ]),
   ],
   controllers: [EventController],

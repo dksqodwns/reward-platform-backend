@@ -8,16 +8,16 @@ import {
   UserListQueryPayload,
 } from '@payload/auth';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  RefreshToken,
-  RefreshTokenDocument,
-  User,
-  UserDocument,
-} from '../schemas';
+
 import { Model } from 'mongoose';
 import { PasswordEncoder, TokenService } from '../utils';
 import { RpcException } from '@nestjs/microservices';
 import { ErrorCode } from '@common/error-code.enum';
+import { User, UserDocument } from '@schema/user.schema';
+import {
+  RefreshToken,
+  RefreshTokenDocument,
+} from '@schema/refresh-token.schema';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +40,8 @@ export class AuthService {
       email: user.email,
       userName: user.userName,
       roles: user.roles,
+      consecutiveLoginDays: user.consecutiveLoginDays,
+      invitesSent: user.invitesSent,
     };
   }
 

@@ -15,10 +15,11 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@common/*": ["libs/common/src/*"],
       "@payload/*": ["libs/payload/src/*"],
-      "@common/*": ["libs/common/src/*"]
+      "@schema/*": ["libs/schema/src/*"]
     },
-    "typeRoots": ['./types']
+    "typeRoots": ["./types"]
   },
   "exclude": ["node_modules", "tmp"]
 }

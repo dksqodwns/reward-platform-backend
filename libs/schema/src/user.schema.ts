@@ -6,28 +6,28 @@ export type UserDocument = HydratedDocument<User>;
 @Schema({ collection: 'users', timestamps: true })
 export class User {
   @Prop({ required: true, unique: true, lowercase: true })
-  email: string;
+  email!: string;
 
   @Prop({ required: true })
-  password: string;
+  password!: string;
 
   @Prop({ required: true })
-  userName: string;
+  userName!: string;
 
   @Prop({ type: [String], default: ['USER'] })
-  roles: string[];
+  roles!: string[];
 
   @Prop()
   lastLoginAt?: Date;
 
   @Prop({ default: 0 })
-  consecutiveLoginDays: number;
+  consecutiveLoginDays!: number;
 
   @Prop({ default: 0 })
-  invitesSent: number;
+  invitesSent!: number;
 
   @Prop({ default: 0 })
-  points: number;
+  points!: number;
 
   @Prop({
     type: [
@@ -40,7 +40,7 @@ export class User {
     ],
     default: [],
   })
-  coupons: Array<{
+  coupons!: Array<{
     couponKey: string;
     issuedAt: Date;
     expiresAt?: Date;
@@ -57,7 +57,7 @@ export class User {
     ],
     default: [],
   })
-  items: Array<{
+  items!: Array<{
     itemKey: string;
     quantity: number;
     metadata?: any;

@@ -6,7 +6,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type, TypeHelpOptions } from 'class-transformer';
-import { ConditionType } from '../event.condition-types.eum';
+
+import { ConditionType } from '@schema/event.schema';
 
 export class LoginDaysDto {
   @IsNumber()

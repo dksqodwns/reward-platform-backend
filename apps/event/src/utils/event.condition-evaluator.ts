@@ -1,8 +1,11 @@
 // apps/event/src/utils/event-condition.evaluator.ts
 import { Injectable } from '@nestjs/common';
-import { ConditionType } from '@payload/event';
 import { AuthUserResponsePayload } from '@payload/auth';
-import { ConditionGroup, ConditionRule } from '../schemas';
+import {
+  ConditionGroup,
+  ConditionRule,
+  ConditionType,
+} from '@schema/event.schema';
 
 @Injectable()
 export class EventConditionEvaluator {

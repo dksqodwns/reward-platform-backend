@@ -1,8 +1,8 @@
 import { RewardProcessor } from './reward-processor.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
-import { User, UserDocument } from '../../../../auth/src/schemas';
 import { Model } from 'mongoose';
+import { User, UserDocument } from '@schema/user.schema';
 
 @Injectable()
 export class PointRewardProcessor implements RewardProcessor {

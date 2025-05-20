@@ -1,4 +1,4 @@
-import { ConditionType } from '../event.condition-types.eum';
+import { ConditionType } from '@schema/event.schema';
 
 export interface LoginDaysParams {
   days: number;

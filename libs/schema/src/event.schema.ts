@@ -1,20 +1,23 @@
 // apps/event/src/schemas/event.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
-import { ConditionType } from '@payload/event';
 
 export type EventDocument = HydratedDocument<Event>;
 
-// 조건: AND/OR + 규칙 배열
+export enum ConditionType {
+  LOGIN_DAYS_7 = 'LOGIN_DAYS_7',
+  FRIEND_INVITE = 'FRIEND_INVITE',
+}
+
 @Schema()
 export class ConditionRule {
   @Prop({
     required: true,
     enum: Object.values(ConditionType),
   })
-  type: ConditionType;
+  type!: ConditionType;
   @Prop({ type: MongooseSchema.Types.Mixed, required: true })
-  params: any; // ex) { days: 3 } 등
+  params: any;
 }
 
 const ConditionRuleSchema = SchemaFactory.createForClass(ConditionRule);
@@ -22,49 +25,44 @@ const ConditionRuleSchema = SchemaFactory.createForClass(ConditionRule);
 @Schema()
 export class ConditionGroup {
   @Prop({ required: true, enum: ['AND', 'OR'], default: 'AND' })
-  operator: 'AND' | 'OR';
+  operator!: 'AND' | 'OR';
   @Prop({ type: [ConditionRuleSchema], required: true })
-  rules: ConditionRule[];
+  rules!: ConditionRule[];
 }
 
 const ConditionGroupSchema = SchemaFactory.createForClass(ConditionGroup);
 
-// 이벤트 보상 자체(수량·한도)
 @Schema()
 export class Reward {
   @Prop({ required: true })
-  rewardKey: string; // reward_metadata.key 를 참조하는 비즈니스 키
+  rewardKey!: string;
   @Prop({ required: true })
-  amount: number; // 지급 수량
+  amount!: number;
   @Prop({ required: true, min: 1 })
-  maxQuantity: number; // 이벤트 전체 차원의 최대 지급 횟수
+  maxQuantity!: number;
 }
 
 const RewardSchema = SchemaFactory.createForClass(Reward);
 
-// 메인 Event 스키마
 @Schema({ collection: 'events', timestamps: true })
 export class Event {
   @Prop({ required: true, unique: true })
-  key: string; // ex) 'WELCOME_EVENT'
+  key!: string;
 
   @Prop({ type: ConditionGroupSchema, required: true })
-  condition: ConditionGroup;
+  condition!: ConditionGroup;
 
   @Prop({ type: [RewardSchema], required: true })
-  rewards: Reward[];
-
-  @Prop({ default: false })
-  repeatable: boolean;
+  rewards!: Reward[];
 
   @Prop({ default: 1, required: true, min: 1 })
-  maxTimes: number;
+  maxTimes!: number;
 
   @Prop({ required: true })
-  isActive: boolean;
+  isActive!: boolean;
 
-  @Prop() startAt: Date;
-  @Prop() endAt: Date;
+  @Prop() startAt!: Date;
+  @Prop() endAt!: Date;
 
   @Prop({
     type: MongooseSchema.Types.ObjectId,
@@ -72,7 +70,7 @@ export class Event {
     required: true,
     index: true,
   })
-  createdBy: Types.ObjectId;
+  createdBy!: Types.ObjectId;
 }
 
 export const EventSchema = SchemaFactory.createForClass(Event);
