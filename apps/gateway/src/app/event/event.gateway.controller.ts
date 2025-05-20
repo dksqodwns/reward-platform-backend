@@ -19,6 +19,7 @@ import { JwtAuthGuard, PermissionsGuard } from '../../guards';
 import { EventDefaultQueries } from '@payload/event/queries/event.default.queries';
 import { EventCreateRewardPayload } from '@payload/event';
 import { RpcExceptionFilter } from '../../filter/rpc-exception.filter';
+import { EventGetRewardRequestsQueries } from '@payload/event/queries/event.get-reward-requests.queries';
 
 @UseFilters(RpcExceptionFilter)
 @UseGuards(JwtAuthGuard, PermissionsGuard)
@@ -66,8 +67,21 @@ export class EventGatewayController {
     return this.eventGatewayService.getEventRewardList(key);
   }
 
-  @Get('/rewards/:rewardKey')
+  @Get('rewards/:rewardKey')
   async getRewardByRewardKey(@Param('rewardKey') rewardKey: string) {
     return this.eventGatewayService.getRewardByRewardKey(rewardKey);
+  }
+
+  @Get('rewards/requests')
+  async getRewardRequestListHandler(query: EventGetRewardRequestsQueries) {
+    return this.eventGatewayService.getRewardRequestList(query);
+  }
+
+  @Get('rewards/requests/:id')
+  async getRewardRequestByUserIdHandler(
+    @Param('id') userId: string,
+    query: EventGetRewardRequestsQueries
+  ) {
+    return this.eventGatewayService.getRewardRequestByUserId(userId, query);
   }
 }

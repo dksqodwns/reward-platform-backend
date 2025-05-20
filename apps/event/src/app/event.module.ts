@@ -3,13 +3,18 @@ import { EventController } from './event.controller';
 import { EventService } from './event.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Event, EventSchema, UserEvent, UserEventSchema } from '../schemas';
+import {
+  CouponRewardProcessor,
+  EventConditionEvaluator,
+  PointRewardProcessor,
+  RewardProcessorFactory,
+} from '../utils';
 
 @Module({
   imports: [
     MongooseModule.forRoot(
       'mongodb://root:skfk4fkd@localhost:27017/reward_event?authSource=admin',
       {
-        // TODO: DB 주소 env
         autoCreate: true,
         autoIndex: true,
       }
@@ -20,6 +25,14 @@ import { Event, EventSchema, UserEvent, UserEventSchema } from '../schemas';
     ]),
   ],
   controllers: [EventController],
-  providers: [EventService],
+  providers: [
+    EventService,
+    EventConditionEvaluator,
+    PointRewardProcessor,
+    { provide: 'POINT', useExisting: PointRewardProcessor },
+    CouponRewardProcessor,
+    { provide: 'COUPON', useExisting: CouponRewardProcessor },
+    RewardProcessorFactory,
+  ],
 })
 export class EventModule {}

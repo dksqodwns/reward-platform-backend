@@ -4,6 +4,10 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { EventCreatePayload } from '@payload/event';
 import { EventGetListPayload } from '@payload/event/rpc/event.get-list.payload';
 import { EventCreateRewardRpcPayload } from '@payload/event/rpc/event.create-reward.rpc.payload';
+import {
+  EventGetRewardRequestListPayload,
+  EventGetRewardRequestPayload,
+} from '@payload/event/rpc/event.get-reward-requests.payload';
 
 @Controller()
 export class EventController {
@@ -37,5 +41,19 @@ export class EventController {
   @MessagePattern({ cmd: 'event:getReward' })
   async getRewardByRewardKey(rewardKey: string) {
     return this.eventService.getRewardByRewardKey(rewardKey);
+  }
+
+  @MessagePattern({ cmd: 'event:getRequests' })
+  async getRewardRequestList(
+    @Payload() payload: EventGetRewardRequestListPayload
+  ) {
+    return this.eventService.getRewardRequestList(payload);
+  }
+
+  @MessagePattern({ cmd: 'event:getUserRequests' })
+  async getRewardRequestByUserId(
+    @Payload() payload: EventGetRewardRequestPayload
+  ) {
+    return this.eventService.getRewardRequest(payload);
   }
 }

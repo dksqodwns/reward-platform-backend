@@ -4,9 +4,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 export type UserEventDocument = HydratedDocument<UserEvent>;
 
 export enum RewardStatus {
-  PENDING = 'pending',
-  REQUESTED = 'requested',
-  REJECTED = 'rejected',
+  PENDING = 'PENDING',
+  REQUESTED = 'REQUESTED',
+  GRANTED = 'GRANTED',
+  REJECTED = 'REJECTED',
 }
 
 @Schema({ collection: 'user_events', timestamps: true })
@@ -20,9 +21,6 @@ export class UserEvent {
   @Prop({ enum: RewardStatus, default: RewardStatus.PENDING })
   status: RewardStatus;
 
-  @Prop({ required: true })
-  repeatable: boolean;
-
   @Prop({ type: MongooseSchema.Types.Mixed, default: {} })
   extraData?: any;
 }
@@ -31,5 +29,10 @@ export const UserEventSchema = SchemaFactory.createForClass(UserEvent);
 
 UserEventSchema.index(
   { userId: 1, eventKey: 1 },
-  { unique: true, partialFilterExpression: { repeatable: false } }
+  {
+    unique: true,
+    partialFilterExpression: {
+      status: RewardStatus.REQUESTED,
+    },
+  }
 );
