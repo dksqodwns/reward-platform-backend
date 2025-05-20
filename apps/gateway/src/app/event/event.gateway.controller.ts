@@ -52,6 +52,7 @@ export class EventGatewayController {
   }
 
   @Post(':key/rewards')
+  @Permissions(Permission.EVENT_CREATE)
   async createEventRewardHandler(
     @Param('key') key: string,
     @Body() dto: EventCreateRewardPayload,
@@ -73,6 +74,7 @@ export class EventGatewayController {
   }
 
   @Get('rewards/requests')
+  @Permissions(Permission.EVENT_READ)
   async getRewardRequestListHandler(query: EventGetRewardRequestsQueries) {
     return this.eventGatewayService.getRewardRequestList(query);
   }
