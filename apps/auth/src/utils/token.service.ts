@@ -7,14 +7,19 @@ import {
   ReturnRefreshTokenPayload,
 } from '@payload/auth';
 import { UserDocument } from '@schema/user.schema';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TokenService {
-  // TODO: configService나 env에 넣어서 관리하게 변경이 필요함
-  private readonly ACCESS_TOKEN_SECRET = 'JWT_SECRET_KEY';
-  private readonly REFRESH_TOKEN_SECRET = 'JWT_SECRET_KEY';
-  s;
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly config: ConfigService
+  ) {}
+
+  private readonly ACCESS_TOKEN_SECRET =
+    this.config.get<string>('JWT_SECRET_KEY');
+  private readonly REFRESH_TOKEN_SECRET =
+    this.config.get<string>('JWT_SECRET_KEY');
 
   async createAccessToken(
     user: UserDocument
